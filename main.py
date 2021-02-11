@@ -1,32 +1,37 @@
-import time
-import busio
-import digitalio
-from board import SCK, MOSI, MISO, D2, D3
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+import sys
+import os
+from getFromServer import getRequests
 
-from adafruit_rgb_display import color565
-import adafruit_rgb_display.ili9341 as ili9341
+if os.environ.get('DISPLAY','') == '':
+    print('no display found. Using :0.0')
+    os.environ.__setitem__('DISPLAY', ':0.0')
 
 
-# Configuration for CS and DC pins:
-CS_PIN = D2
-DC_PIN = D3
+#create main window
+master = Tk()
+master.title("Todo List")
+master.geometry("240x320")
+#master.attributes("-fullscreen", True)
+master.config(cursor='none')
+#master.lift
 
-# Setup SPI bus using hardware SPI:
-spi = busio.SPI(clock=SCK, MOSI=MOSI, MISO=MISO)
 
-# Create the ILI9341 display:
-display = ili9341.ILI9341(spi, cs=digitalio.DigitalInOut(CS_PIN),
-                          dc=digitalio.DigitalInOut(DC_PIN))
+#make a label for the window
+label1 = Label(master, text='Current to do list: ')
+# Lay out label
+label1.pack()
 
-# Main loop:
-while True:
-    # Clear the display
-    display.fill(0)
-    # Draw a red pixel in the center.
-    display.pixel(120, 160, color565(255, 0, 0))
-    # Pause 2 seconds.
-    time.sleep(2)
-    # Clear the screen blue.
-    display.fill(color565(0, 0, 255))
-    # Pause 2 seconds.
-    time.sleep(2)
+t = Text(master)
+
+#Process data
+res = getRequests()['data'][0]
+for item in res:
+    t.insert(END, '# ' + item['task'] + '\n')
+
+t.pack()
+# Run forever!
+master.mainloop()
