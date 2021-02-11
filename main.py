@@ -15,7 +15,7 @@ if os.environ.get('DISPLAY','') == '':
 master = Tk()
 master.title("Todo List")
 master.geometry("240x320")
-#master.attributes("-fullscreen", True)
+master.attributes("-fullscreen", True)
 master.config(cursor='none')
 #master.lift
 
