@@ -1,37 +1,72 @@
 try:
-    from Tkinter import *
+    import Tkinter as tk
 except ImportError:
-    from tkinter import *
-import sys
+    import tkinter as tk
+from gui import (mainScreen, changingScreen)
 import os
 from getFromServer import getRequests
+import time
 
-if os.environ.get('DISPLAY','') == '':
+if os.environ.get('DISPLAY', '') == '':
     print('no display found. Using :0.0')
     os.environ.__setitem__('DISPLAY', ':0.0')
 
 
-#create main window
-master = Tk()
-master.title("Todo List")
-master.geometry("240x320")
-master.attributes("-fullscreen", True)
-master.config(cursor='none')
-#master.lift
+def split(arr, size):
+    arrs = []
+    while len(arr) > size:
+        pice = arr[:size]
+        arrs.append(pice)
+        arr = arr[size:]
+    arrs.append(arr)
+    return arrs
 
 
-#make a label for the window
-label1 = Label(master, text='Current to do list: ')
-# Lay out label
-label1.pack()
+def getData():
+    onlyOnePage = False
+    # first time show
+    responses = getRequests()
 
-t = Text(master)
+    if len(responses) > 4:
+        onlyOnePage = True
+        resText = split(responses, 4)
+        page = len(resText)
 
-#Process data
-res = getRequests()['data'][0]
-for item in res:
-    t.insert(END, '# ' + item['task'] + '\n')
+        return resText, onlyOnePage
+    else:
+        text = ""
+        page = 1
+        for item in responses:
+            text += '# ' + item['task'] + '\n'
+            # text += '\n'
+        return text, onlyOnePage
 
-t.pack()
+
+def updateTheScreen():
+    # Process data
+    text = ""
+    print('Refreshing screen')
+    textRes, boolPages = getData()
+    if not boolPages:
+        changingScreen(master, textRes, len(textRes))
+        master.after(1000, updateTheScreen)
+
+    else:
+        # here is to be updated -> more than one pages
+        for i in range(len(textRes)):
+            #append all text into one string
+            for j in range(len(textRes[i])):
+                text += "->" + textRes[i][j]['task'] + '\n'
+        changingScreen(master, "Loading", 0)
+        master.after(4000, changingScreen, master, text, len(textRes))
+        master.after(60000, updateTheScreen)
+
+#   create main window
+master = tk.Tk()
+
+#   show the static main screen + frames
+mainScreen(master)
+updateTheScreen()
+# master.after(3000, updateTheScreen, money)
 # Run forever!
 master.mainloop()
