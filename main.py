@@ -55,11 +55,15 @@ def updateTheScreen():
         # here is to be updated -> more than one pages
         for i in range(len(textRes)):
             #append all text into one string
+            text = ""
             for j in range(len(textRes[i])):
-                text += "->" + textRes[i][j]['task'] + '\n'
-        changingScreen(master, "Loading", 0)
-        master.after(4000, changingScreen, master, text, len(textRes))
-        master.after(60000, updateTheScreen)
+                text += "->" + textRes[i][j]['task'] + '\n \n'
+
+            changingScreen(master, 'Loading..\n', 0)
+            time.sleep(15)
+            master.after(10000, changingScreen, master, text, i+1)
+        #changingScreen(master, 'Loading..\n', 0)
+        master.after(50000, updateTheScreen)
 
 #   create main window
 master = tk.Tk()
